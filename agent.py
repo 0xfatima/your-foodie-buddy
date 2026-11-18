@@ -4,7 +4,7 @@ import os
 import asyncio
 from pathlib import Path
 from fastmcp.client import Client, PythonStdioTransport
-from langchain_ibm import ChatWatsonx
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, SystemMessage
 
 SERVER_SCRIPT = str(Path(__file__).parent / "server.py")
@@ -19,15 +19,17 @@ Use the tools whenever a question is about specific restaurants, recommendations
 Base your answers only on what the tools return; if nothing is found, say so and suggest another search.
 Keep answers short, clear and conversational."""
 
-project_id = os.environ.get("WATSONX_AI_PROJECT_ID") or os.environ.get("WATSONX_PROJECT_ID")
+# Gemini reads its key from GOOGLE_API_KEY (or GEMINI_API_KEY).
+# Set GEMINI_MODEL to use a different model.
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
 
 
 def make_model():
-    return ChatWatsonx(
-        model_id="ibm/granite-4-h-small",
-        url="https://us-south.ml.cloud.ibm.com",
-        project_id=project_id,
-        params={"temperature": 0.7},
+    return ChatGoogleGenerativeAI(
+        model=GEMINI_MODEL,
+        google_api_key=api_key,
+        temperature=0.7,
     )
 
 
